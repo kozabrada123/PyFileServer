@@ -48,43 +48,7 @@ def upload_a_file():
 
       print("Uploaded " + secure_filename(fi.filename))
 
-      return f"""
-<!doctype html>
-<html lang="en">
-
-<head>
-    <title>File Uploaded!</title>
-    <!-- Required meta tags -->
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-
-    <!-- Bootstrap CSS v5.0.2 -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
-
-</head>
-
-<body>
-
-    <div class="row m-4">
-        <div class="d-flex align-items-center justify-content-center">
-            <div class="card">
-                <img class="card-img-top" src="holder.js/100x180/" alt="">
-                <div class="card-body">
-                    <h4 class="card-title">File uploaded!</h4>
-                    <p class="card-text">File {secure_filename(fi.filename)} was succesfully uploaded!</p>
-                    <a name="" id="" class="btn btn-primary" href="/{secure_filename(fi.filename)}" role="button">View File</a>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Bootstrap JavaScript Libraries -->
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js" integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js" integrity="sha384-cVKIPhGWiC2Al4u+LWgxfKTRIcfu0JTxR+EQDz/bgldoEyl4H0zUF0QKbrJ0EcQF" crossorigin="anonymous"></script>
-</body>
-
-</html>
-        """
+      return render_template('uploadsucess.html', fi_filename=secure_filename(fi.filename))
 
 @app.route(f"/<filename>")
 def file(filename):
@@ -109,118 +73,16 @@ def genFileHtml(fname):
             curfile = file
 
 
-    if file.type in ["png", "jpg", "jpeg", "gif", "webp", "txt"]:
+    #if file.type in ["png", "jpg", "jpeg", "gif", "webp", "txt"]:
         #Send with preview
-        try:
-            html = f"""
-    <!doctype html>
-    <html lang="en">
-    
-    <head>
-        <title>{curfile.name}</title>
-        <!-- Required meta tags -->
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    
-        <!-- Bootstrap CSS v5.0.2 -->
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
-    
-    </head>
-    
-    <body>
-    
-        <div class="row m-4">
-            <div class="d-flex align-items-center justify-content-center">
-                <div class="card m-5">
-                    <img class="card-img-top" src="holder.js/100x180/" alt="">
-                    <div class="card-body p-1">
-                        <h4 class="card-title m-2 p-2">{curfile.name}</h4>
-                        <p class="card-text m-2 p-2">Path: {str(curfile.path)}</p>
-                        <p class="card-text m-2 p-2">Size: {str(curfile.size)}b</p>
-                        <p class="card-text m-2 p-2">Type: {str(curfile.type)}</p>
-                        <div class="m-3 p-2">
-                            <a name="" id="" class="btn btn-secondary mx-1 p-2" href="/{curfile.name}/preview" role="button">Preview</a>
-                            <a name="" id="" class="btn btn-primary mx-1 p-2" href="/{curfile.name}/download" role="button">Download</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    
-    
-    
-        <!-- Bootstrap JavaScript Libraries -->
-        <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js" integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p" crossorigin="anonymous"></script>
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js" integrity="sha384-cVKIPhGWiC2Al4u+LWgxfKTRIcfu0JTxR+EQDz/bgldoEyl4H0zUF0QKbrJ0EcQF" crossorigin="anonymous"></script>
-    </body>
-    
-    </html>
-            """
+    try:
 
-            return html
+        return render_template("file.html", curfile_name = curfile.name, curfile_path = curfile.path, curfile_size = curfile.size, curfile_type = curfile.type)
 
-        except:
-
-            html = f"""
-            <p>No file "{fname}" found.
-            """
-
-            return html
-
-    else:
-        #Send without preview
-        try:
-            html = f"""
-        <!doctype html>
-        <html lang="en">
-
-        <head>
-            <title>{curfile.name}</title>
-            <!-- Required meta tags -->
-            <meta charset="utf-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-
-            <!-- Bootstrap CSS v5.0.2 -->
-            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
-
-        </head>
-
-        <body>
-
-            <div class="row m-4">
-                <div class="d-flex align-items-center justify-content-center">
-                    <div class="card m-5">
-                        <img class="card-img-top" src="holder.js/100x180/" alt="">
-                        <div class="card-body p-1">
-                            <h4 class="card-title m-2 p-2">{curfile.name}</h4>
-                            <p class="card-text m-2 p-2">Path: {str(curfile.path)}</p>
-                            <p class="card-text m-2 p-2">Size: {str(curfile.size)}b</p>
-                            <p class="card-text m-2 p-2">Type: {str(curfile.type)}</p>
-                            <a name="" id="" class="btn btn-primary p-2 m-3 p-2" href="/{curfile.name}/download" role="button">Download</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
+    except:
 
 
-
-            <!-- Bootstrap JavaScript Libraries -->
-            <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js" integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p" crossorigin="anonymous"></script>
-            <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js" integrity="sha384-cVKIPhGWiC2Al4u+LWgxfKTRIcfu0JTxR+EQDz/bgldoEyl4H0zUF0QKbrJ0EcQF" crossorigin="anonymous"></script>
-        </body>
-
-        </html>
-                """
-
-            return html
-
-        except:
-
-            html = f"""
-                <p>No file "{fname}" found.
-                """
-
-            return html
+        return render_template("404.html")
 
 def downloadFile(fname):
 
@@ -236,11 +98,7 @@ def downloadFile(fname):
 
     except:
 
-        html = f"""
-        <p>No file "{fname}" found.
-        """
-
-        return html
+        return render_template("404.html")
 
 def previewFile(fname):
 
@@ -256,11 +114,7 @@ def previewFile(fname):
 
     except:
 
-        html = f"""
-        <p>No file "{fname}" found.
-        """
-
-        return html
+        return render_template("404.html")
 
 #Start web server
 app.run(host='0.0.0.0',debug=True)
