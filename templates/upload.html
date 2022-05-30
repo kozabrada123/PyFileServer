@@ -86,8 +86,7 @@
             });
 
             //Send request
-            xhr.send(new FormData(UForm));
-
+            await xhr.send(new FormData(UForm));
 
             //Redirect
             var fullPath = document.getElementById('UFormFile').value;
