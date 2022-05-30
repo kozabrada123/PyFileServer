@@ -27,7 +27,7 @@
                         <div class="form-group mx-auto m-3">
                             <label class="">
                                 <span>Select File</span>
-                                <input type="file" class="form-control-file input-lg" name="file" id="UFormFile" placeholder="" aria-describedby="fileHelpId">
+                                <input type="file" class="form-control-file input-lg" name="file" id="UFile" placeholder="" aria-describedby="fileHelpId">
                             </label>
                         </div>
 
@@ -83,22 +83,26 @@
 
                 UPBar.value = percent.toFixed(2);
                 UPBarText.textContent = percent.toFixed(2) + "%";
-            });
 
-            //Send request
-            await xhr.send(new FormData(UForm));
-
-            //Redirect
-            var fullPath = document.getElementById('UFormFile').value;
-            if (fullPath) {
-                var startIndex = (fullPath.indexOf('\\') >= 0 ? fullPath.lastIndexOf('\\') : fullPath.lastIndexOf('/'));
-                var filename = fullPath.substring(startIndex);
-                if (filename.indexOf('\\') === 0 || filename.indexOf('/') === 0) {
-                    filename = filename.substring(1);
-                }
-                window.location.href = '../uploader/' + filename;
+                if (percent == 100) {
+                    //Redirect
+                    var fullPath = document.getElementById('UFile').value;
+                    if (fullPath) {
+                        var startIndex = (fullPath.indexOf('\\') >= 0 ? fullPath.lastIndexOf('\\') : fullPath.lastIndexOf('/'));
+                        var filename = fullPath.substring(startIndex);
+                        if (filename.indexOf('\\') === 0 || filename.indexOf('/') === 0) {
+                        filename = filename.substring(1);
+                    }
+                window.location.replace('../uploader/' + filename)
 
             }
+                }
+            });
+
+
+            //Send request
+            xhr.send(new FormData(UForm));
+
 
 
         }
