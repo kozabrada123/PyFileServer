@@ -1,4 +1,4 @@
-from flask import Flask, send_file, render_template, request
+from flask import Flask, send_file, render_template, request, g
 from markupsafe import escape
 
 from werkzeug.utils import secure_filename
@@ -41,19 +41,33 @@ def upload_file():
 def upload_a_file():
    if request.method == 'POST':
 
-      fi = request.files['file']
-      fi.save("files/" + secure_filename(fi.filename))
+        fi = request.files['file']
+        filename = secure_filename(randomizeName(getType(fi.filename)))
 
-      #Refresh files
-      filesm.refreshFiles()
+        latestfile = filename
+        latestfilen = fi.filename
 
-      print("Uploaded " + secure_filename(fi.filename))
+        setLatest(latestfile, latestfilen)
 
-      return render_template('uploadsucess.html', fi_filename=secure_filename(fi.filename))
+
+        fi.save("files/" + filename)
+
+        #Refresh files
+        filesm.refreshFiles()
+
+        print("Uploaded " + filename)
+
+        return render_template('uploadsucess.html', fi_filename=filename, fi_filenamen=latestfilen)
 
 @app.route('/uploader/<filename>')
 def show_uploaded(filename):
-    return render_template('uploadsucess.html', fi_filename=secure_filename(filename))
+    
+    latestfile, latestfilen = getLatest()
+    
+    if filename == "latest":
+        return render_template('uploadsucess.html', fi_filename=secure_filename(latestfile), fi_filenamen=latestfilen)
+
+    return render_template('uploadsucess.html', fi_filename=secure_filename(filename), fi_filenamen=latestfilen)
 
 @app.route(f"/<filename>")
 def file(filename):

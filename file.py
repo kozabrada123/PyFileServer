@@ -1,4 +1,5 @@
 import os
+import binascii
 import random
 import json
 import config
@@ -129,6 +130,10 @@ def generateFiles():
 
 def normalizeSize(sizeb):
 
+
+
+
+
     size = sizeb
     append = "b"
 
@@ -158,3 +163,36 @@ def normalizeSize(sizeb):
 
     size = "%.2f" % size
     return f"{str(size)}{append}"
+
+
+
+
+def randomizeName(extension):
+
+    random = binascii.b2a_hex(os.urandom(4)).decode("ascii")
+    name = f"{random}.{extension}"
+    return name
+
+
+def getType(name):
+    try:
+        type = name.split(".")
+        type = type[len(type)-1]
+
+        if type == name:
+            return ""
+    except:
+        type = ""
+
+    return type
+
+def setLatest(latestfile, latestfilen):
+    
+    with open("temp", "w") as f:
+        f.write(latestfile + "!-!" + latestfilen)
+        f.close()
+
+def getLatest():
+    f = open("temp", "r")
+    latestfile, latestfilen = f.read().split("!-!")
+    return latestfile, latestfilen
