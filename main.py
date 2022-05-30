@@ -11,6 +11,8 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from file import *
 from filemanager import *
 
+import config
+
 #Start file manager
 filesm = filemanager()
 filesm.refreshFiles()
@@ -23,9 +25,8 @@ scheduler.start()
 #Web code
 app = Flask(__name__)
 
-#TESTING SIZE, REPLACE ME!
-#2 GB
-app.config['MAX_CONTENT_PATH'] = 2147483648
+#Set max size in b
+app.config['MAX_CONTENT_LENGTH'] = config.max_filesize_bytes
 
 @app.route('/')
 def index():
@@ -49,6 +50,10 @@ def upload_a_file():
       print("Uploaded " + secure_filename(fi.filename))
 
       return render_template('uploadsucess.html', fi_filename=secure_filename(fi.filename))
+
+@app.route('/uploader/<filename>')
+def show_uploaded(filename):
+    return render_template('uploadsucess.html', fi_filename=secure_filename(filename))
 
 @app.route(f"/<filename>")
 def file(filename):
@@ -77,10 +82,9 @@ def genFileHtml(fname):
         #Send with preview
     try:
 
-        return render_template("file.html", curfile_name = curfile.name, curfile_path = curfile.path, curfile_size = curfile.size, curfile_type = curfile.type)
+        return render_template("file.html", curfile_name = curfile.name, curfile_path = curfile.path, curfile_size = normalizeSize(curfile.size), curfile_type = curfile.type)
 
     except:
-
 
         return render_template("404.html")
 

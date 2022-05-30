@@ -20,19 +20,24 @@
                 <div class="card-body">
 
 
-                    <form action="/uploader" method="POST" enctype="multipart/form-data" class="m-2 d-flex align-items-center justify-content-center">
+                    <form action="/uploader" method="POST" enctype="multipart/form-data" class="m-2 d-flex align-items-center justify-content-center" id="UForm">
 
                         <!--label for="" class="form-label m-2">Upload file</label!-->
 
                         <div class="form-group mx-auto m-3">
                             <label class="">
                                 <span>Select File</span>
-                                <input type="file" class="form-control-file input-lg" name="file" id="" placeholder="" aria-describedby="fileHelpId">
+                                <input type="file" class="form-control-file input-lg" name="file" id="UFormFile" placeholder="" aria-describedby="fileHelpId">
                             </label>
                         </div>
 
                         <div class="m-3">
-                            <button type="submit" class="btn btn-success btn-md px-4 m-3">Upload</button>
+                            <button type="submit" class="btn btn-success btn-md px-4 m-3" id="UButton">Upload</button>
+                        </div>
+
+                        <div class="m-3 d-none" id="UPBarC">
+                            <progress class="nes-progress is-primary d-flex" value="0" max="100" id="UPBar"></progress>
+                            <p class="d-flex m-2" id="UPBarText">0%</p>
                         </div>
 
                     </form>
@@ -44,6 +49,62 @@
     <!-- Bootstrap JavaScript Libraries -->
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js" integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js" integrity="sha384-cVKIPhGWiC2Al4u+LWgxfKTRIcfu0JTxR+EQDz/bgldoEyl4H0zUF0QKbrJ0EcQF" crossorigin="anonymous"></script>
+
+    <script>
+        //Only to add a progress bar
+
+        const UForm = document.getElementById("UForm");
+        const UFile = document.getElementById("UFile");
+        const UPBarC = document.getElementById("UPBarC");
+        const UPBar = document.getElementById("UPBar");
+        const UPBarText = document.getElementById("UPBarText");
+
+
+        UForm.addEventListener("submit", uploadFile);
+
+        function uploadFile (e) {
+
+            e.preventDefault();
+
+            //Hide button
+            document.getElementById("UButton").classList.add("d-none");
+
+            // Show bar
+            UPBarC.classList.remove("d-none");
+            UPBarC.classList.add("d-flex");
+            
+            //Request
+            const xhr = new XMLHttpRequest();
+
+            xhr.open("POST", "/uploader");
+            xhr.upload.addEventListener("progress", e => {
+                //Update bar
+                const percent = e.lengthComputable ? (e.loaded / e.total) * 100 : 0;
+
+                UPBar.value = percent.toFixed(2);
+                UPBarText.textContent = percent.toFixed(2) + "%";
+            });
+
+            //Send request
+            xhr.send(new FormData(UForm));
+
+
+            //Redirect
+            var fullPath = document.getElementById('UFormFile').value;
+            if (fullPath) {
+                var startIndex = (fullPath.indexOf('\\') >= 0 ? fullPath.lastIndexOf('\\') : fullPath.lastIndexOf('/'));
+                var filename = fullPath.substring(startIndex);
+                if (filename.indexOf('\\') === 0 || filename.indexOf('/') === 0) {
+                    filename = filename.substring(1);
+                }
+                window.location.href = '../uploader/' + filename;
+
+            }
+
+
+        }
+
+    </script>
 </body>
 
 </html>

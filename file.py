@@ -1,18 +1,18 @@
 import os
 import random
 import json
+import config
 
 
-basicpath = "./files"
 
 class file:
 
 
 
-    def __init__(self, path="./files/dummy.txt"):
+    def __init__(self, path=f"{config.files_path}dummy.txt"):
 
         #Parse name
-        self.name=path.replace("./files/", "")
+        self.name=path.replace(config.files_path, "")
 
         #Parse size
         try:
@@ -23,7 +23,8 @@ class file:
 
         #Parse type
         try:
-            self.type = self.name.split(".")[1]
+            self.type = self.name.split(".")
+            self.type = self.type[len(self.type)-1]
         except:
             self.type = "Empty"
 
@@ -33,7 +34,7 @@ class file:
             self.path = path
 
         else:
-            self.path = "./files/dummy.txt"
+            self.path = f"{config.files_path}dummy.txt"
 
 
 
@@ -68,13 +69,13 @@ class file:
         else:
             self.type = "dummy"
 
-    def setPath(self, path="./files/dummy.txt"):
+    def setPath(self, path=f"{config.files_path}dummy.txt"):
         # Parse type
         if path != None:
             self.path = path
 
         else:
-            self.path = "./files/dummy.txt"
+            self.path = f"{config.files_path}dummy.txt"
 
 def listFromJson(jsonf):
     filelist = json.loads(jsonf)
@@ -118,9 +119,42 @@ def loadJson():
 
 def generateFiles():
     list = []
-    oslist = os.listdir(basicpath)
+    oslist = os.listdir(config.files_path)
 
     for afile in oslist:
-        list.append(file("./files/" + afile))
+        list.append(file(f"{config.files_path}" + afile))
 
     return list
+
+
+def normalizeSize(sizeb):
+
+    size = sizeb
+    append = "b"
+
+    # >= 1k bytes // 1 * 10 ** 3
+    if size >= 1000:
+
+        size = size / 1000
+        append = "kb"
+
+        # >= 1mb // 1 * 10 ** 6
+        if size >= 1000:
+        
+            size = size / 1000
+            append = "mb"
+
+            # >= 1gb // 1 * 10 ** 9
+            if size >= 1000:
+
+                size = size / 1000
+                append = "gb"
+
+                # >= 1tb // 1 * 10 ** 12
+                if size >= 1000:
+
+                    size = size / 1000
+                    append = "tb"
+
+    size = "%.2f" % size
+    return f"{str(size)}{append}"
