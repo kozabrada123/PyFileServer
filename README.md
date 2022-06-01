@@ -13,4 +13,5 @@ A Simple, Secure python file sharing server with a retro style.
 - Python
 - Flask
 - Cryptography
+- Bootstrap
 - Nes.css
