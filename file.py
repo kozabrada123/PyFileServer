@@ -3,7 +3,9 @@ import binascii
 import random
 import json
 
+import keyring
 import config
+
 
 
 class file:
