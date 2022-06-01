@@ -169,6 +169,9 @@ def downloadFile(fname, key=None):
             # Get the extension
             temp_filename_e = curfile.path.split(".")
             temp_filename_e = "." + temp_filename_e[len(temp_filename_e)-1]
+
+            if temp_filename_e == curfile.path:
+                temp_filename_e = ""
             
             # Get the filename before extension
             temp_filename = curfile.path.split("/")

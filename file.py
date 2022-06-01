@@ -28,6 +28,9 @@ class file:
         try:
             self.type = self.name.split(".")
             self.type = self.type[len(self.type)-1]
+
+            if self.type == self.name:
+                self.type = "None"
         except:
             self.type = "Empty"
 
