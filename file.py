@@ -2,6 +2,8 @@ import os
 import binascii
 import random
 import json
+
+import keyring
 import config
 
 
@@ -186,13 +188,13 @@ def getType(name):
 
     return type
 
-def setLatest(latestfile, latestfilen):
+def setLatest(latestfile, latestfilen, key=None):
     
     with open("temp", "w") as f:
-        f.write(latestfile + "!-!" + latestfilen)
+        f.write(latestfile + "!-!" + latestfilen + "!-!" + str(key))
         f.close()
 
 def getLatest():
     f = open("temp", "r")
-    latestfile, latestfilen = f.read().split("!-!")
-    return latestfile, latestfilen
+    latestfile, latestfilen, key = f.read().split("!-!")
+    return latestfile, latestfilen, key

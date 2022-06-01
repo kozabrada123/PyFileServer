@@ -1,5 +1,6 @@
 from flask import Flask, send_file, render_template, request, g
 from markupsafe import escape
+from cryptography.fernet import Fernet
 
 from werkzeug.utils import secure_filename
 
@@ -42,48 +43,83 @@ def upload_a_file():
    if request.method == 'POST':
 
         fi = request.files['file']
-        filename = secure_filename(randomizeName(getType(fi.filename)))
+
+        if config.random_filenames:
+            filename = secure_filename(randomizeName(getType(fi.filename)))
+
+        else:
+            filename = secure_filename(fi.filename)
 
         latestfile = filename
         latestfilen = fi.filename
 
-        setLatest(latestfile, latestfilen)
+        if config.encrypt:
+            key = Fernet.generate_key()
+            setLatest(latestfile, latestfilen, key.decode())
+
+            with open(config.files_path + filename, "w") as file:
+                # read all file data
+                file_data = fi.stream.read()
+                # encrypt data
+                f = Fernet(key)
+                encrypted_data = f.encrypt(file_data)
+                
+                # Write to disk
+                file.write(encrypted_data.decode())
 
 
-        fi.save("files/" + filename)
+
+        else:
+            setLatest(latestfile, latestfilen)
+            fi.save(config.files_path + filename)
 
         #Refresh files
         filesm.refreshFiles()
 
         print("Uploaded " + filename)
 
-        return render_template('uploadsucess.html', fi_filename=filename, fi_filenamen=latestfilen)
+        return render_template('uploadsucess.html', fi_filename=filename, fi_filenamen=latestfilen, key = key.decode())
 
 @app.route('/uploader/<filename>')
 def show_uploaded(filename):
     
-    latestfile, latestfilen = getLatest()
+    latestfile, latestfilen, key = getLatest()
+
+    setLatest("None", "None", "None")
     
     if filename == "latest":
-        return render_template('uploadsucess.html', fi_filename=secure_filename(latestfile), fi_filenamen=latestfilen)
+        return render_template('uploadsucess.html', fi_filename=secure_filename(latestfile), fi_filenamen=latestfilen, key = key)
 
-    return render_template('uploadsucess.html', fi_filename=secure_filename(filename), fi_filenamen=latestfilen)
+    return render_template('uploadsucess.html', fi_filename=secure_filename(filename), fi_filenamen=latestfilen, key = key)
 
 @app.route(f"/<filename>")
 def file(filename):
-    return genFileHtml(filename)
+    if not config.encrypt:
+        return genFileHtml(filename)
+    else:
+        key = request.args['key']
+        return genFileHtml(filename, key)
 
 
 @app.route(f"/<filename>/download")
 def download(filename):
-    return downloadFile(filename)
+    if not config.encrypt:
+        return downloadFile(filename)
+    else:
+        key = request.args["key"]
+        return downloadFile(filename, key)
+
 
 @app.route(f"/<filename>/preview")
 def preview(filename):
-    return previewFile(filename)
+    if not config.encrypt:
+        return previewFile(filename)
+    else:
+        key = request.args["key"]
+        return previewFile(filename, key)
 
 
-def genFileHtml(fname):
+def genFileHtml(fname, key=None):
 
     curfile = None
 
@@ -96,13 +132,13 @@ def genFileHtml(fname):
         #Send with preview
     try:
 
-        return render_template("file.html", curfile_name = curfile.name, curfile_path = curfile.path, curfile_size = normalizeSize(curfile.size), curfile_type = curfile.type)
+        return render_template("file.html", curfile_name = curfile.name, curfile_path = curfile.path, curfile_size = normalizeSize(curfile.size), curfile_type = curfile.type, key = str(key))
 
     except:
 
         return render_template("404.html")
 
-def downloadFile(fname):
+def downloadFile(fname, key=None):
 
     curfile = None
 
@@ -111,14 +147,54 @@ def downloadFile(fname):
             curfile = file
 
 
-    try:
-        return send_file(curfile.path, as_attachment=True)
+    if not config.encrypt:
+        try:
+            return send_file(curfile.path, as_attachment=True)
 
-    except:
+        except:
 
-        return render_template("404.html")
+            return render_template("404.html")
 
-def previewFile(fname):
+
+    else:
+        try:
+            # Decrypt data
+            f = Fernet(key.encode())
+            file = open(curfile.path, "r")
+            file_data = file.read()
+            decrypted = f.decrypt(file_data.encode())
+
+
+            # Convulted way to add _d before the extension
+            # Get the extension
+            temp_filename_e = curfile.path.split(".")
+            temp_filename_e = "." + temp_filename_e[len(temp_filename_e)-1]
+            
+            # Get the filename before extension
+            temp_filename = curfile.path.split("/")
+            temp_filename = temp_filename[len(temp_filename)-1].replace(temp_filename_e, "")
+            
+            # Add _d and then the extension
+            temp_filename = temp_filename + "_d" + temp_filename_e
+            
+            # Save temp file
+            temp = open(temp_filename, "w", encoding='latin-1')
+            temp.write(decrypted.decode('latin-1'))
+            temp.close()
+
+            # Send
+            send = send_file(temp_filename, as_attachment=True)
+
+            # Delete temp file
+            os.remove(temp_filename)
+
+            return send
+
+        except Exception as e:
+            print(e)
+            
+
+def previewFile(fname, key=None):
 
     curfile = None
 
@@ -126,13 +202,50 @@ def previewFile(fname):
         if file.name == fname:
             curfile = file
 
+    if not config.encrypt:
+        try:
+            return send_file(curfile.path)
 
-    try:
-        return send_file(curfile.path)
+        except:
 
-    except:
+            return render_template("404.html")
 
-        return render_template("404.html")
+    else:
+        try:
+            # Decrypt data
+            f = Fernet(key.encode())
+            file = open(curfile.path, "r")
+            file_data = file.read()
+            decrypted = f.decrypt(file_data.encode())
+
+
+            # Convulted way to add _d before the extension
+            # Get the extension
+            temp_filename_e = curfile.path.split(".")
+            temp_filename_e = "." + temp_filename_e[len(temp_filename_e)-1]
+            
+            # Get the filename before extension
+            temp_filename = curfile.path.split("/")
+            temp_filename = temp_filename[len(temp_filename)-1].replace(temp_filename_e, "")
+            
+            # Add _d and then the extension
+            temp_filename = temp_filename + "_d" + temp_filename_e
+            
+            # Save temp file
+            temp = open(temp_filename, "w", encoding='latin-1')
+            temp.write(decrypted.decode('latin-1'))
+            temp.close()
+
+            # Send
+            send = send_file(temp_filename)
+
+            # Delete temp file
+            os.remove(temp_filename)
+
+            return send
+
+        except Exception as e:
+            print(e)
 
 #Start web server
 app.run(host='0.0.0.0',debug=True)
