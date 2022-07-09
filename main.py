@@ -72,16 +72,16 @@ def upload_a_file():
         else:
             setLatest(latestfile, latestfilen)
             fi.save(config.files_path + filename)
+            key = "None"
 
         #Refresh files
         filesm.refreshFiles()
 
         print("Uploaded " + filename)
 
-        if config.encrypt:
-            return render_template('uploadsucess.html', fi_filename=filename, fi_filenamen=latestfilen, key = key.decode())
-        else:
-            return render_template('uploadsucess.html', fi_filename=filename, fi_filenamen=latestfilen)
+
+        return render_template('uploadsucess.html', fi_filename=filename, fi_filenamen=latestfilen, key = key.decode())
+
 
 @app.route('/uploader/<filename>')
 def show_uploaded(filename):
