@@ -78,7 +78,10 @@ def upload_a_file():
 
         print("Uploaded " + filename)
 
-        return render_template('uploadsucess.html', fi_filename=filename, fi_filenamen=latestfilen, key = key.decode())
+        if config.encrypt:
+            return render_template('uploadsucess.html', fi_filename=filename, fi_filenamen=latestfilen, key = key.decode())
+        else:
+            return render_template('uploadsucess.html', fi_filename=filename, fi_filenamen=latestfilen)
 
 @app.route('/uploader/<filename>')
 def show_uploaded(filename):

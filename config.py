@@ -16,8 +16,8 @@ max_filesize_bytes = 2 * (10 ** 9)
 files_path = "./files/"
 
 # Random filenames; sets a random filename when a file is uploaded
-random_filenames = True
+random_filenames = False
 
 # Encrypt; Encrypts all files on disk and throws away the key.
 # User get their key when they upload and must provide it when downloading
-encrypt = True
+encrypt = False
